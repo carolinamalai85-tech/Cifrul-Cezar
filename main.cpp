@@ -1,231 +1,135 @@
-#include <iostream>
-#include <string>
-#include <vector>
+# Alfabetul românesc
+ALFABET = "AĂÂBCDEFGHIÎJKLMNOPQRSȘTȚUVWXYZ"
 
-using namespace std;
 
-const vector<string> ALFABET_BAZA = {
-    "A", "Ă", "Â", "B", "C", "D", "E", "F", "G", "H", "I", "Î", 
-    "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "Ș", "T", 
-    "Ț", "U", "V", "W", "X", "Y", "Z"
-};
+# Transformă textul în litere mari și verifică dacă este valid
+def curata_text(text):
+    text = text.upper().replace(" ", "")
 
-const vector<string> ALFABET_MIC = {
-    "a", "ă", "â", "b", "c", "d", "e", "f", "g", "h", "i", "î", 
-    "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "ș", "t", 
-    "ț", "u", "v", "w", "x", "y", "z"
-};
+    for litera in text:
+        if litera not in ALFABET:
+            print("Eroare! Simbol invalid:", litera)
+            return None
 
-vector<string> extrageCaractereUTF8(const string& str) {
-    vector<string> caractere;
-    for (size_t i = 0; i < str.length(); ) {
-        unsigned char c = str[i];
-        int lungimeSecventa = 1;
+    return text
 
-        if ((c & 0x80) == 0) lungimeSecventa = 1;
-        else if ((c & 0xE0) == 0xC0) lungimeSecventa = 2;
-        else if ((c & 0xF0) == 0xE0) lungimeSecventa = 3;
-        else if ((c & 0xF8) == 0xF0) lungimeSecventa = 4;
 
-        caractere.push_back(str.substr(i, lungimeSecventa));
-        i += lungimeSecventa;
-    }
-    return caractere;
-}
+# Cezar simplu
+def cezar_simplu():
+    print("\n--- CIFRUL CEZAR SIMPLU ---")
 
-int gasestePozitieBaza(const string& litera) {
-    for (size_t i = 0; i < ALFABET_BAZA.size(); ++i) {
-        if (ALFABET_BAZA[i] == litera || ALFABET_MIC[i] == litera) {
-            return i;
-        }
-    }
-    return -1;
-}
+    operatie = int(input("1. Criptare\n2. Decriptare\nAlege: "))
 
-int gasestePozitieInVector(const vector<string>& alfabet, const string& litera) {
-    for (size_t i = 0; i < alfabet.size(); ++i) {
-        if (alfabet[i] == litera) return i;
-    }
-    return -1;
-}
+    if operatie != 1 and operatie != 2:
+        print("Optiune invalida!")
+        return
 
-bool curataText(const string& text_str, vector<string>& textCurat) {
-    textCurat.clear();
-    vector<string> simboluri = extrageCaractereUTF8(text_str);
+    k1 = int(input("Introdu cheia k1 (1-30): "))
 
-    for (const string& s : simboluri) {
-        if (s == " " || s == "\t") continue;
+    if k1 < 1 or k1 > 30:
+        print("Cheia trebuie sa fie intre 1 si 30!")
+        return
 
-        int pos = gasestePozitieBaza(s);
-        if (pos != -1) {
-            textCurat.push_back(ALFABET_BAZA[pos]);
-        } else {
-            cout << "Eroare: Simbolul '" << s << "' nu este o litera valida in alfabetul roman!\n";
-            return false;
-        }
-    }
-    return true;
-}
+    text = input("Introdu textul: ")
+    text = curata_text(text)
 
-void proceseazaCezarSimplu() {
-    int operatie, k1;
-    string text_str;
-    vector<string> textCurat, rezultat;
+    if text is None:
+        return
 
-    cout << "\n--- CIFRUL CEZAR SIMPLU (O CHEIE) ---\n";
-    cout << "1. Criptare\n2. Decriptare\nAlege operatia (1 sau 2): ";
-    cin >> operatie;
-    if (operatie != 1 && operatie != 2) {
-        cout << "Opțiune invalida!\n";
-        return;
-    }
+    rezultat = ""
 
-    cout << "Introduce cheia k1 (1 - 30): ";
-    cin >> k1;
-    if (k1 < 1 || k1 > 30) {
-        cout << "Eroare: Cheia k1 trebuie sa fie intre 1 si 30!\n";
-        return;
-    }
+    for litera in text:
+        pozitie = ALFABET.index(litera)
 
-    cin.ignore();
-    cout << "Introduce textul/criptograma: ";
-    getline(cin, text_str);
+        if operatie == 1:
+            pozitie_noua = (pozitie + k1) % 31
+        else:
+            pozitie_noua = (pozitie - k1) % 31
 
-    if (!curataText(text_str, textCurat)) return;
+        rezultat += ALFABET[pozitie_noua]
 
-    for (const string& litera : textCurat) {
-        int pos = gasestePozitieBaza(litera);
-        int posNoua;
+    print("\nText procesat:", text)
+    print("Rezultat:", rezultat)
 
-        if (operatie == 1) {
-            posNoua = (pos + k1) % 31;
-        } else {
-            posNoua = (pos - k1 + 31) % 31;
-        }
 
-        rezultat.push_back(ALFABET_BAZA[posNoua]);
-    }
+# Cezar cu permutare
+def cezar_permutare():
+    print("\n--- CIFRUL CEZAR CU PERMUTARE ---")
 
-    cout << "\n-----------------------------------\n";
-    cout << "Text procesat: ";
-    for (const string& s : textCurat) cout << s;
-    cout << "\nRezultat:      ";
-    for (const string& s : rezultat) cout << s;
-    cout << "\n-----------------------------------\n";
-}
+    operatie = int(input("1. Criptare\n2. Decriptare\nAlege: "))
 
-void proceseazaCezarCuPermutare() {
-    int operatie, k1;
-    string k2_str, text_str;
-    vector<string> A_permutat;
-    vector<string> textCurat, rezultat;
+    if operatie != 1 and operatie != 2:
+        print("Optiune invalida!")
+        return
 
-    cout << "\n--- CIFRUL CEZAR CU PERMUTARE (DOUA CHEI) ---\n";
-    cout << "1. Criptare\n2. Decriptare\nAlege operatia (1 sau 2): ";
-    cin >> operatie;
-    if (operatie != 1 && operatie != 2) {
-        cout << "Opțiune invalida!\n";
-        return;
-    }
+    k1 = int(input("Introdu cheia k1 (1-30): "))
 
-    cout << "Introduce cheia k1 (1 - 30): ";
-    cin >> k1;
-    if (k1 < 1 || k1 > 30) {
-        cout << "Eroare: Cheia k1 trebuie sa fie intre 1 si 30!\n";
-        return;
-    }
+    if k1 < 1 or k1 > 30:
+        print("Cheia trebuie sa fie intre 1 si 30!")
+        return
 
-    cin.ignore();
-    cout << "Introduce cheia k2 (minim 7 litere): ";
-    getline(cin, k2_str);
+    k2 = input("Introdu cheia k2 (minim 7 litere): ")
+    k2 = curata_text(k2)
 
-    vector<string> k2_simboluri = extrageCaractereUTF8(k2_str);
-    vector<string> k2_valide;
+    if k2 is None:
+        return
 
-    for (const string& s : k2_simboluri) {
-        if (s == " " || s == "\t") continue;
-        int pos = gasestePozitieBaza(s);
-        if (pos != -1) {
-            k2_valide.push_back(ALFABET_BAZA[pos]);
-        } else {
-            cout << "Eroare: Cheia k2 contine caractere invalide ('" << s << "')!\n";
-            return;
-        }
-    }
+    if len(k2) < 7:
+        print("Cheia k2 trebuie sa aiba cel putin 7 litere!")
+        return
 
-    if (k2_valide.size() < 7) {
-        cout << "Eroare: Cheia k2 trebuie sa aiba cel putin 7 litere!\n";
-        return;
-    }
+    # Construim alfabetul permutat
+    alfabet_permutat = ""
 
-    // Construim alfabetul permutat
-    for (const string& litera : k2_valide) {
-        if (gasestePozitieInVector(A_permutat, litera) == -1) {
-            A_permutat.push_back(litera);
-        }
-    }
-    for (const string& litera : ALFABET_BAZA) {
-        if (gasestePozitieInVector(A_permutat, litera) == -1) {
-            A_permutat.push_back(litera);
-        }
-    }
+    for litera in k2 + ALFABET:
+        if litera not in alfabet_permutat:
+            alfabet_permutat += litera
 
-    cout << "Alfabetul permutat este: ";
-    for (const string& s : A_permutat) cout << s;
-    cout << "\n";
+    print("Alfabetul permutat:", alfabet_permutat)
 
-    cout << "Introduce textul/criptograma: ";
-    getline(cin, text_str);
+    text = input("Introdu textul: ")
+    text = curata_text(text)
 
-    if (!curataText(text_str, textCurat)) return;
+    if text is None:
+        return
 
-    for (const string& litera : textCurat) {
-        int pos = gasestePozitieInVector(A_permutat, litera);
-        int posNoua;
+    rezultat = ""
 
-        if (operatie == 1) {
-            posNoua = (pos + k1) % 31;
-        } else {
-            posNoua = (pos - k1 + 31) % 31;
-        }
+    for litera in text:
+        pozitie = alfabet_permutat.index(litera)
 
-        rezultat.push_back(A_permutat[posNoua]);
-    }
+        if operatie == 1:
+            pozitie_noua = (pozitie + k1) % 31
+        else:
+            pozitie_noua = (pozitie - k1) % 31
 
-    cout << "\n-----------------------------------\n";
-    cout << "Text procesat: ";
-    for (const string& s : textCurat) cout << s;
-    cout << "\nRezultat:      ";
-    for (const string& s : rezultat) cout << s;
-    cout << "\n-----------------------------------\n";
-}
+        rezultat += alfabet_permutat[pozitie_noua]
 
-int main() {
-    int optiuneMeniu;
+    print("\nText procesat:", text)
+    print("Rezultat:", rezultat)
 
-    do {
-        cout << "\n================ MENIU PRINCIPAL ================\n";
-        cout << "1. Criptare / Decriptare cu O CHEIE (Cezar Simplu)\n";
-        cout << "2. Criptare / Decriptare cu DOUA CHEI (Cezar cu Permutare)\n";
-        cout << "3. Iesire din program\n";
-        cout << "Alege opțiunea (1-3): ";
-        cin >> optiuneMeniu;
 
-        switch (optiuneMeniu) {
-            case 1:
-                proceseazaCezarSimplu();
-                break;
-            case 2:
-                proceseazaCezarCuPermutare();
-                break;
-            case 3:
-                cout << "Programul s-a incheiat. La revedere!\n";
-                break;
-            default:
-                cout << "Opțiune invalida! Te rog sa alegi 1, 2 sau 3.\n";
-                break;
-        }
-    } while (optiuneMeniu != 3);
+# Programul principal
+while True:
 
-    return 0;
-}
+    print("\n================ MENIU ================")
+    print("1. Cezar simplu")
+    print("2. Cezar cu permutare")
+    print("3. Iesire")
+
+    optiune = int(input("Alege optiunea: "))
+
+    if optiune == 1:
+        cezar_simplu()
+
+    elif optiune == 2:
+        cezar_permutare()
+
+    elif optiune == 3:
+        print("Programul s-a incheiat. La revedere!")
+        break
+
+    else:
+        print("Optiune invalida!")
+
+
