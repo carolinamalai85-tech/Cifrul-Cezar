@@ -1,3 +1,6 @@
+import sys
+
+sys.stdin.reconfigure(encoding="utf-8", errors="replace")
 # Alfabetul românesc
 ALFABET = "AĂÂBCDEFGHIÎJKLMNOPQRSȘTȚUVWXYZ"
 
